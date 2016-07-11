@@ -12,7 +12,14 @@
         "messageKeys": [],
         "projectType": "native",
         "resources": {
-            "media": []
+            "media": [
+                {
+                    "file": "images/sunny.png",
+                    "name": "SUNNY",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                }
+            ]
         },
         "sdkVersion": "3",
         "uuid": "0761de86-69d8-484f-a21b-0b6dfb2f3619",
