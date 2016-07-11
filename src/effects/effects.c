@@ -222,6 +222,8 @@ void effect_colorize(GContext* ctx,  GRect position, void* param) {
 // Added by Martin Norland (@cynorg)
 // Parameter:  GColor firstColor, GColor secondColor
 void effect_colorswap(GContext* ctx,  GRect position, void* param) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "> effect_colorswap");
+  
 #ifdef PBL_COLOR // only logical to do anything on Basalt - otherwise you're just ... doing an invert
   //capturing framebuffer bitmap
   GBitmap *fb = graphics_capture_frame_buffer(ctx);
@@ -234,10 +236,14 @@ void effect_colorswap(GContext* ctx,  GRect position, void* param) {
   
   EffectColorpair *swap = (EffectColorpair *)param;
   GColor pixel;
+  
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "      Colorpair adress: %p, swap argb:%d to argb:%d", swap, swap->firstColor.argb, swap->secondColor.argb);
 
   for (int y = 0; y < position.size.h; y++){
      for (int x = 0; x < position.size.w; x++){
           pixel.argb = get_pixel(bitmap_info, y + position.origin.y, x + position.origin.x);
+          if (x % 100 == 0 && y % 100 == 0)
+            APP_LOG(APP_LOG_LEVEL_DEBUG, "      x:%03d y:%03d argb:%03d", x, y, pixel.argb);
           if (gcolor_equal(pixel, swap->firstColor))
             set_pixel(bitmap_info, y + position.origin.y, x + position.origin.x, swap->secondColor.argb);
           else if (gcolor_equal(pixel, swap->secondColor))
@@ -246,6 +252,8 @@ void effect_colorswap(GContext* ctx,  GRect position, void* param) {
   graphics_release_frame_buffer(ctx, fb);
   }
 #endif
+
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "< effect_colorswap");
 }
 
 // invert black and white only (leaves all other colors intact).
