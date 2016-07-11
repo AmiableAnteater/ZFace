@@ -1,0 +1,24 @@
+{
+    "author": "andreas.zielke@gmail.com",
+    "dependencies": {},
+    "keywords": [],
+    "name": "zface",
+    "pebble": {
+        "capabilities": [
+            ""
+        ],
+        "displayName": "ZFace",
+        "enableMultiJS": false,
+        "messageKeys": [],
+        "projectType": "native",
+        "resources": {
+            "media": []
+        },
+        "sdkVersion": "3",
+        "uuid": "0761de86-69d8-484f-a21b-0b6dfb2f3619",
+        "watchapp": {
+            "watchface": false
+        }
+    },
+    "version": "1.0.0"
+}
