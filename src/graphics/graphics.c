@@ -1,22 +1,47 @@
+#include <stdio.h>
 #include <pebble.h>
 #include "graphics.h"
 
 static Window *s_main_window;
 static GBitmap *s_bitmap;
 static Layer *s_canvas_layer;
-static EffectLayer *s_effect_layer_left;
-static EffectColorpair* s_colorpair_left;
-static EffectLayer* s_effect_layer_right;
-static EffectColorpair* s_colorpair_right;
+static EffectLayer *s_effect_layer;
+static EffectMultiColorpair* s_multicolorpair;
 static float s_progress = .7f;
 
-static EffectLayer* create_progress_effect_layer(EffectColorpair* colorpair) {
-  EffectLayer* effect_layer = effect_layer_create(GRect(0, 0, 10, 10));
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "    creating effect layer %p", effect_layer);
+// changes several colors in one pass
+void effect_multicolorswap(GContext* ctx,  GRect position, void* param) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "> effect_multicolorswap");
+  
+#ifdef PBL_COLOR // only logical to do anything on Basalt - otherwise you're just ... doing an invert
+  //capturing framebuffer bitmap
+  GBitmap *fb = graphics_capture_frame_buffer(ctx);
+ 
+  BitmapInfo bitmap_info;
+  bitmap_info.bitmap = fb;
+  bitmap_info.bitmap_data =  gbitmap_get_data(fb);
+  bitmap_info.bytes_per_row = gbitmap_get_bytes_per_row(fb);
+  bitmap_info.bitmap_format = gbitmap_get_format(fb);
+  
+  EffectMultiColorpair *swap = (EffectMultiColorpair *)param;
+  GColor pixel;
+  for (int x = 0; x < position.size.w; x++){
+    for (int y = 0; y < position.size.h; y++){
+       pixel.argb = get_pixel(bitmap_info, y + position.origin.y, x + position.origin.x);
+       for (int colIdx = 0; colIdx < MAX_REPLACE_COLORS; colIdx++) {
+          if (gcolor_equal(pixel, swap->fromColor[colIdx])) {
+            GColor toColor = (x <= swap->finishedX) ? swap->toColorFinishedPart[colIdx] : swap->toColorUnfinishedPart[colIdx];
+            if (x%20 == 0 && y %50 == 0)
+              APP_LOG(APP_LOG_LEVEL_DEBUG, "x:%03d y:%03d: Swapping %03d to %03d", x, y, pixel.argb, toColor.argb);
+            set_pixel(bitmap_info, y + position.origin.y, x + position.origin.x, toColor.argb);
+          }
+       }
+     }
+  }
+  graphics_release_frame_buffer(ctx, fb);
+#endif
 
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "    Colorpair adress: %p, swap argb:%d to argb:%d", colorpair, colorpair->firstColor.argb, colorpair->secondColor.argb);
-  effect_layer_add_effect(effect_layer, effect_colorswap, colorpair);
-  return effect_layer;
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "< effect_colorswap");
 }
 
 static void update_proc(Layer *layer, GContext *ctx) {
@@ -26,10 +51,8 @@ static void update_proc(Layer *layer, GContext *ctx) {
   // Set the compositing mode (GCompOpSet is required for transparency)
   graphics_context_set_compositing_mode(ctx, GCompOpSet);
   graphics_draw_bitmap_in_rect(ctx, s_bitmap, bitmap_bounds);
-  
-  const int progress = (int)(144.0 * s_progress);
-  GRect frame = GRect(0, 0, progress, 168);
-  effect_layer_set_frame(s_effect_layer_left, frame);
+
+  s_multicolorpair->finishedX = (int)(144.0 * s_progress);
 
   APP_LOG(APP_LOG_LEVEL_DEBUG, "< update_proc");
 }
@@ -42,7 +65,7 @@ static void main_window_load(Window *window) {
   s_canvas_layer = layer_create(GRect(0, 0, bounds.size.w, bounds.size.h));
   layer_set_update_proc(s_canvas_layer, update_proc);
   layer_add_child(window_layer, s_canvas_layer);
-  layer_add_child(s_canvas_layer, effect_layer_get_layer(s_effect_layer_left));
+  layer_add_child(s_canvas_layer, effect_layer_get_layer(s_effect_layer));
   APP_LOG(APP_LOG_LEVEL_DEBUG, "< main_window_load");
 }
 
@@ -56,15 +79,13 @@ void init_graphics(uint32_t resource_id) {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "> init_graphics");
   s_main_window = window_create();
   
-  s_colorpair_left = (EffectColorpair*)malloc(sizeof(EffectColorpair));
-  s_colorpair_left->firstColor = GColorWhite;
-  s_colorpair_left->secondColor = GColorYellow;
-  s_effect_layer_left = create_progress_effect_layer(s_colorpair_left);
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "    effect layer adress: %p", s_effect_layer_left);
+  s_multicolorpair = (EffectMultiColorpair*)malloc(sizeof(EffectMultiColorpair));
+  s_multicolorpair->fromColor[0] = GColorWhite;
+  s_multicolorpair->toColorFinishedPart[0] = GColorYellow;
+  s_multicolorpair->toColorUnfinishedPart[0] = GColorPastelYellow;
 
-  s_colorpair_right = (EffectColorpair*)malloc(sizeof(EffectColorpair));
-  s_colorpair_right->firstColor = GColorWhite;
-  s_colorpair_right->secondColor = GColorPastelYellow;  
+  s_effect_layer = effect_layer_create(GRect(0, 0, 144, 168));
+  effect_layer_add_effect(s_effect_layer, effect_multicolorswap, s_multicolorpair);
 
   // Create the object from resource file
   s_bitmap = gbitmap_create_with_resource(resource_id);
@@ -81,13 +102,14 @@ void init_graphics(uint32_t resource_id) {
 
 void deinit_graphics() {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "> deinit_graphics");
-  free(s_colorpair_left);
-  free(s_colorpair_right);
+  free(s_multicolorpair);
+  s_multicolorpair = NULL;
   
   // Destroy the image data
   gbitmap_destroy(s_bitmap);
-  effect_layer_destroy(s_effect_layer_left);
-  effect_layer_destroy(s_effect_layer_right);
+  effect_layer_destroy(s_effect_layer);
+  free(s_effect_layer);
+  s_effect_layer = NULL;
   window_destroy(s_main_window);
   
   APP_LOG(APP_LOG_LEVEL_DEBUG, "< deinit_graphics");

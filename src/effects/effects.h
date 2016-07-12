@@ -114,3 +114,6 @@ effect_cb effect_fps;
 effect_cb effect_shadow;
 
 effect_cb effect_outline;
+
+uint8_t get_pixel(BitmapInfo bitmap_info, int y, int x);
+void set_pixel(BitmapInfo bitmap_info, int y, int x, uint8_t color);

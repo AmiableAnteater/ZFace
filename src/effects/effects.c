@@ -7,7 +7,7 @@
   
   
 // set pixel color at given coordinates 
-static void set_pixel(BitmapInfo bitmap_info, int y, int x, uint8_t color) {
+void set_pixel(BitmapInfo bitmap_info, int y, int x, uint8_t color) {
   
   if (bitmap_info.bitmap_format == GBitmapFormat1Bit || bitmap_info.bitmap_format == GBitmapFormat1BitPalette) { // for 1 bit bitmap on Aplite  --- verify if it needs to be different
     
@@ -29,7 +29,7 @@ static void set_pixel(BitmapInfo bitmap_info, int y, int x, uint8_t color) {
 }
 
 // get pixel color at given coordinates 
-static uint8_t get_pixel(BitmapInfo bitmap_info, int y, int x) {
+uint8_t get_pixel(BitmapInfo bitmap_info, int y, int x) {
 
   if (bitmap_info.bitmap_format == GBitmapFormat1Bit || bitmap_info.bitmap_format == GBitmapFormat1BitPalette) { // for 1 bit bitmap on Aplite - shifting right to get bit
     
