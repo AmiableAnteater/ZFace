@@ -16,3 +16,5 @@ typedef struct {
 } EffectMultiColorpair;
 
 effect_cb effect_multicolorswap;
+
+void updateTime(struct tm *time);
