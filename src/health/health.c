@@ -28,7 +28,7 @@ void health_handler(HealthEventType event, void *context) {
   if(mask & HealthServiceAccessibilityMaskAvailable) {
     // Data is available!
     APP_LOG(APP_LOG_LEVEL_INFO, "Steps today: %d", (int)health_service_sum_today(metric));
-    
+    updateSteps(get_todays_steps());
   } else {
     // No data recorded yet today
     APP_LOG(APP_LOG_LEVEL_ERROR, "Step data unavailable!");

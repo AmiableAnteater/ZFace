@@ -20,7 +20,9 @@ static void init() {
   
 #if defined(PBL_HEALTH)
   // Attempt to subscribe 
-  if(!health_service_events_subscribe(health_handler, NULL)) {
+  if(health_service_events_subscribe(health_handler, NULL)) {
+    updateSteps(get_todays_steps());
+  } else {
     APP_LOG(APP_LOG_LEVEL_ERROR, "Health subscription failed!");
   }
 #else

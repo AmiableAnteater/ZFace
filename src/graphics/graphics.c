@@ -7,9 +7,9 @@ static GBitmap *s_bitmap;
 static Layer *s_canvas_layer;
 static EffectLayer *s_effect_layer;
 static EffectMultiColorpair* s_multicolorpair;
-static float s_progress = .7f;
+static float s_progress = .0f;
 static TextLayer *s_time_layer;
-
+static TextLayer *s_steps_layer;
 
 // changes several colors in one pass
 void effect_multicolorswap(GContext* ctx,  GRect position, void* param) {
@@ -59,6 +59,20 @@ void updateTime(struct tm *time) {
 
 
 
+void updateSteps(int stepcount) {
+  static char s_buffer[8];
+  
+  if (stepcount >= 0) {
+    s_progress = ((float)stepcount)/10000.0f;
+    snprintf(s_buffer, 8, "%d", stepcount);
+    text_layer_set_text(s_steps_layer, s_buffer);
+    layer_mark_dirty(text_layer_get_layer(s_steps_layer));
+    
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "updateSteps %d %f", stepcount, s_progress);
+  }
+}
+
+
 static void update_proc(Layer *layer, GContext *ctx) {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "> update_proc");
   
@@ -98,6 +112,21 @@ static void main_window_load(Window *window) {
   // Add it as a child layer to the Window's root layer
   layer_add_child(window_layer, text_layer_get_layer(s_time_layer));
   
+  
+    // Create layer to show time
+  // Create the TextLayer with specific bounds
+  s_steps_layer = text_layer_create(GRect(0, PBL_IF_ROUND_ELSE(108, 102), bounds.size.w, 50));
+
+  // Improve the layout to be more like a watchface
+  text_layer_set_background_color(s_steps_layer, GColorClear);
+  text_layer_set_text_color(s_steps_layer, GColorBlack);
+  text_layer_set_text(s_steps_layer, "0");
+  text_layer_set_font(s_steps_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
+  text_layer_set_text_alignment(s_steps_layer, GTextAlignmentCenter);
+
+  // Add it as a child layer to the Window's root layer
+  layer_add_child(window_layer, text_layer_get_layer(s_steps_layer));
+  
   APP_LOG(APP_LOG_LEVEL_DEBUG, "< main_window_load");
 }
 
@@ -107,6 +136,7 @@ static void main_window_unload(Window *window) {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "> main_window_unload");
   layer_destroy(s_canvas_layer);
   text_layer_destroy(s_time_layer);
+  text_layer_destroy(s_steps_layer);
   APP_LOG(APP_LOG_LEVEL_DEBUG, "< main_window_unload");
 }
 

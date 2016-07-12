@@ -18,3 +18,4 @@ typedef struct {
 effect_cb effect_multicolorswap;
 
 void updateTime(struct tm *time);
+void updateSteps(int stepcount);
