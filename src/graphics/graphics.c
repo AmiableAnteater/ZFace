@@ -118,7 +118,7 @@ void init_graphics(uint32_t resource_id) {
   
   s_multicolorpair = (EffectMultiColorpair*)malloc(sizeof(EffectMultiColorpair));
   s_multicolorpair->fromColor[0] = GColorWhite;
-  s_multicolorpair->toColorFinishedPart[0] = GColorYellow;
+  s_multicolorpair->toColorFinishedPart[0] = GColorChromeYellow;
   s_multicolorpair->toColorUnfinishedPart[0] = GColorPastelYellow;
 
   s_effect_layer = effect_layer_create(GRect(0, 0, 144, 168));
