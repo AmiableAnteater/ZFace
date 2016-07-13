@@ -9,7 +9,7 @@
             "health"
         ],
         "displayName": "ZFace",
-        "enableMultiJS": false,
+        "enableMultiJS": true,
         "messageKeys": [],
         "projectType": "native",
         "resources": {
@@ -29,7 +29,7 @@
         ],
         "uuid": "0761de86-69d8-484f-a21b-0b6dfb2f3619",
         "watchapp": {
-            "watchface": false
+            "watchface": true
         }
     },
     "version": "1.0.0"

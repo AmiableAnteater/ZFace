@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <pebble.h>
 #include "graphics.h"
 
@@ -8,8 +7,11 @@ static Layer *s_canvas_layer;
 static EffectLayer *s_effect_layer;
 static EffectMultiColorpair* s_multicolorpair;
 static float s_progress = .0f;
+static TextLayer *s_weather_layer;
 static TextLayer *s_time_layer;
 static TextLayer *s_steps_layer;
+static time_t s_last_weather_update = 0;
+static const unsigned int s_max_diff = 60 * 2;
 
 // changes several colors in one pass
 void effect_multicolorswap(GContext* ctx,  GRect position, void* param) {
@@ -48,18 +50,33 @@ void effect_multicolorswap(GContext* ctx,  GRect position, void* param) {
 
 
 
-void updateTime(struct tm *time) {
+void updateTime(struct tm *param_time) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "> updateTime");
+  
   // Write the current hours and minutes into a buffer
   static char s_buffer[8];
-  strftime(s_buffer, sizeof(s_buffer), clock_is_24h_style() ? "%H:%M" : "%I:%M", time);
+  strftime(s_buffer, sizeof(s_buffer), clock_is_24h_style() ? "%H:%M" : "%I:%M", param_time);
 
   // Display this time on the TextLayer
   text_layer_set_text(s_time_layer, s_buffer);
+  
+  static char s_weather_buffer[8];
+  time_t now = time(NULL);
+  unsigned int diff = now - s_last_weather_update;
+  if (diff >= s_max_diff) {
+    s_last_weather_update = now;
+    snprintf(s_weather_buffer, 8, "%u", diff);
+  }
+  text_layer_set_text(s_weather_layer, s_weather_buffer);
+
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "< updateTime");
 }
 
 
 
 void updateSteps(int stepcount) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "> updateSteps");
+  
   static char s_buffer[8];
   
   if (stepcount >= 0) {
@@ -70,6 +87,8 @@ void updateSteps(int stepcount) {
     
     APP_LOG(APP_LOG_LEVEL_DEBUG, "updateSteps %d %f", stepcount, s_progress);
   }
+  
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "< updateSteps");
 }
 
 
@@ -88,6 +107,23 @@ static void update_proc(Layer *layer, GContext *ctx) {
 
 
 
+static void initializeTextLayer(Layer *parent, TextLayer *text_layer, GFont font) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "> initializeTextLayer");
+  
+  // Improve the layout to be more like a watchface
+  text_layer_set_background_color(text_layer, GColorClear);
+  text_layer_set_text_color(text_layer, GColorBlack);
+  text_layer_set_font(text_layer, font);
+  text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
+
+  // Add it as a child layer to the Window's root layer
+  layer_add_child(parent, text_layer_get_layer(text_layer));
+  
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "< initializeTextLayer");
+}
+
+
+
 static void main_window_load(Window *window) {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "> main_window_load");
   Layer *window_layer = window_get_root_layer(window);
@@ -99,33 +135,14 @@ static void main_window_load(Window *window) {
   layer_add_child(s_canvas_layer, effect_layer_get_layer(s_effect_layer));
   
   // Create layer to show time
-  // Create the TextLayer with specific bounds
   s_time_layer = text_layer_create(GRect(0, PBL_IF_ROUND_ELSE(58, 52), bounds.size.w, 50));
-
-  // Improve the layout to be more like a watchface
-  text_layer_set_background_color(s_time_layer, GColorClear);
-  text_layer_set_text_color(s_time_layer, GColorBlack);
-  text_layer_set_text(s_time_layer, "00:00");
-  text_layer_set_font(s_time_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD));
-  text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
-
-  // Add it as a child layer to the Window's root layer
-  layer_add_child(window_layer, text_layer_get_layer(s_time_layer));
+  initializeTextLayer(window_layer, s_time_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD));
   
-  
-    // Create layer to show time
-  // Create the TextLayer with specific bounds
   s_steps_layer = text_layer_create(GRect(0, PBL_IF_ROUND_ELSE(108, 102), bounds.size.w, 50));
-
-  // Improve the layout to be more like a watchface
-  text_layer_set_background_color(s_steps_layer, GColorClear);
-  text_layer_set_text_color(s_steps_layer, GColorBlack);
-  text_layer_set_text(s_steps_layer, "0");
-  text_layer_set_font(s_steps_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
-  text_layer_set_text_alignment(s_steps_layer, GTextAlignmentCenter);
-
-  // Add it as a child layer to the Window's root layer
-  layer_add_child(window_layer, text_layer_get_layer(s_steps_layer));
+  initializeTextLayer(window_layer, s_steps_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
+  
+  s_weather_layer = text_layer_create(GRect(0, PBL_IF_ROUND_ELSE(48, 42), bounds.size.w, 50));
+  initializeTextLayer(window_layer, s_weather_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
   
   APP_LOG(APP_LOG_LEVEL_DEBUG, "< main_window_load");
 }
@@ -137,6 +154,7 @@ static void main_window_unload(Window *window) {
   layer_destroy(s_canvas_layer);
   text_layer_destroy(s_time_layer);
   text_layer_destroy(s_steps_layer);
+  text_layer_destroy(s_weather_layer);
   APP_LOG(APP_LOG_LEVEL_DEBUG, "< main_window_unload");
 }
 
