@@ -1,5 +1,5 @@
 {
-    "author": "andreas.zielke@gmail.com",
+    "author": "az.androiddev@gmail.com",
     "dependencies": {},
     "keywords": [],
     "name": "zface",
@@ -10,7 +10,10 @@
         ],
         "displayName": "ZFace",
         "enableMultiJS": true,
-        "messageKeys": [],
+        "messageKeys": [
+            "TEMPERATURE",
+            "CONDITIONS"
+        ],
         "projectType": "native",
         "resources": {
             "media": [
@@ -27,10 +30,10 @@
             "basalt",
             "chalk"
         ],
-        "uuid": "0761de86-69d8-484f-a21b-0b6dfb2f3619",
+        "uuid": "f797bfe8-ffc2-42c0-9ff0-5959b0edd03a",
         "watchapp": {
             "watchface": true
         }
     },
-    "version": "1.0.0"
+    "version": "0.1.0"
 }

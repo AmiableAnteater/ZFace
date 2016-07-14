@@ -19,3 +19,4 @@ effect_cb effect_multicolorswap;
 
 void updateTime(struct tm *time);
 void updateSteps(int stepcount);
+void updateWeather(int temperature, char* conditions);

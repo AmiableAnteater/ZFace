@@ -1,6 +1,8 @@
 #include <pebble.h>
 #include "graphics/graphics.h"
 #include "health/health.h"
+#include "communication/comm.h"
+#include "weather/weather.h"
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   updateTime(tick_time);
@@ -27,6 +29,14 @@ static void init() {
 #else
   APP_LOG(APP_LOG_LEVEL_ERROR, "Health not available!");
 #endif
+
+  // Register AppMessage callbacks
+  app_message_register_inbox_received(inbox_received_callback);
+  app_message_register_inbox_dropped(inbox_dropped_callback);
+  app_message_register_outbox_failed(outbox_failed_callback);
+  app_message_register_outbox_sent(outbox_sent_callback);
+  
+  init_communication();
 }
 
 

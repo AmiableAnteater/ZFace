@@ -11,7 +11,7 @@ static TextLayer *s_weather_layer;
 static TextLayer *s_time_layer;
 static TextLayer *s_steps_layer;
 static time_t s_last_weather_update = 0;
-static const unsigned int s_max_diff = 60 * 2;
+static const unsigned int s_max_diff = 60 * 20;
 
 // changes several colors in one pass
 void effect_multicolorswap(GContext* ctx,  GRect position, void* param) {
@@ -65,7 +65,18 @@ void updateTime(struct tm *param_time) {
   unsigned int diff = now - s_last_weather_update;
   if (diff >= s_max_diff) {
     s_last_weather_update = now;
-    snprintf(s_weather_buffer, 8, "%u", diff);
+    
+    // Begin dictionary
+    DictionaryIterator *iter;
+    app_message_outbox_begin(&iter);
+  
+    // Add a key-value pair
+    dict_write_uint8(iter, 0, 0);
+  
+    // Send the message!
+    app_message_outbox_send();
+      
+    //snprintf(s_weather_buffer, 8, "%u", diff);
   }
   text_layer_set_text(s_weather_layer, s_weather_buffer);
 
@@ -90,6 +101,23 @@ void updateSteps(int stepcount) {
   
   APP_LOG(APP_LOG_LEVEL_DEBUG, "< updateSteps");
 }
+
+
+
+void updateWeather(int temperature, char* conditions) {
+  // Store incoming information
+  static char temperature_buffer[8];
+  static char conditions_buffer[32];
+  static char weather_layer_buffer[32];
+
+  snprintf(temperature_buffer, sizeof(temperature_buffer), "%d°C", temperature);
+  snprintf(conditions_buffer, sizeof(conditions_buffer), "%s", conditions);
+
+  // Assemble full string and display
+  snprintf(weather_layer_buffer, sizeof(weather_layer_buffer), "%s, %s", temperature_buffer, conditions_buffer);
+  text_layer_set_text(s_weather_layer, weather_layer_buffer);
+}
+
 
 
 static void update_proc(Layer *layer, GContext *ctx) {
@@ -195,8 +223,6 @@ void deinit_graphics() {
   // Destroy the image data
   gbitmap_destroy(s_bitmap);
   effect_layer_destroy(s_effect_layer);
-  free(s_effect_layer);
-  s_effect_layer = NULL;
   window_destroy(s_main_window);
   
   APP_LOG(APP_LOG_LEVEL_DEBUG, "< deinit_graphics");
