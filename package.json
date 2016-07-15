@@ -19,7 +19,8 @@
             "COLOR_GREEN",
             "COLOR_BLUE",
             "OWM_APPID",
-            "OWM_APPID_LEN"
+            "OWM_APPID_LEN",
+            "JS_KIT_READY"
         ],
         "projectType": "native",
         "resources": {

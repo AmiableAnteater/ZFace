@@ -18,6 +18,12 @@ void inbox_received_callback(DictionaryIterator *iterator, void *context) {
     APP_LOG(APP_LOG_LEVEL_DEBUG, "Received config App-ID: %s", app_id_tuple->value->cstring);
     setApiKey(app_id_tuple->value->cstring);
   }
+  
+  Tuple *js_ready_tuple = dict_find(iterator, MESSAGE_KEY_JS_KIT_READY);
+  if (js_ready_tuple) {
+    setJsReady();
+    // TODO request initial weather
+  }
 }
 
 

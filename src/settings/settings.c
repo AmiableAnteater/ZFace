@@ -2,6 +2,8 @@
 #include "settings/settings.h"
 
 static char* s_api_key = NULL;
+static bool s_js_ready = false;
+
 
 void freeApiKey() {
     if (s_api_key != NULL) {
@@ -37,6 +39,7 @@ char* getApiKey() {
 
 
 void init_settings(){
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "> init_settings");
   int api_key_len = persist_read_int(MESSAGE_KEY_OWM_APPID_LEN);
   if (api_key_len > 0) {
     s_api_key = malloc(api_key_len);
@@ -46,7 +49,24 @@ void init_settings(){
     } else {
       APP_LOG(APP_LOG_LEVEL_DEBUG, "Read API key %s from persistent storage.", s_api_key);
     }
+  } else {
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "    api_key_len was 0");
   }
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "< init_settings");
+}
+
+
+
+bool isJsReady() {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "checking PebbleKit JS readyness: %s", (s_js_ready ? "true" : "false"));
+  return s_js_ready;
+}
+
+
+
+void setJsReady() {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "PebbleKit JS is ready.");
+  s_js_ready = true;
 }
 
 

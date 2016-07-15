@@ -44,7 +44,7 @@ void effect_multicolorswap(GContext* ctx,  GRect position, void* param) {
   graphics_release_frame_buffer(ctx, fb);
 #endif
 
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "< effect_colorswap");
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "< effect_multicolorswap");
 }
 
 
@@ -62,7 +62,7 @@ void updateTime(struct tm *param_time) {
   //static char s_weather_buffer[8];
   time_t now = time(NULL);
   unsigned int diff = now - s_last_weather_update;
-  if (diff >= s_max_diff) {
+  if (diff >= s_max_diff && isJsReady()) {
     // TODO: should be set on successful callback
     s_last_weather_update = now;
     

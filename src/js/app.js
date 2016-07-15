@@ -107,9 +107,18 @@ function getWeather() {
 Pebble.addEventListener('ready', 
   function(e) {
     console.log('PebbleKit JS ready!');
-
-    // Get the initial weather
-    getWeather();
+    var dictionary = {
+      'JS_KIT_READY': 1
+    };
+    // Send to Pebble
+    Pebble.sendAppMessage(dictionary,
+                        function(e) {
+                          console.log('Signaled PebbleKit JS readyness successfully!');
+                        },
+                        function(e) {
+                          console.log('Error sending PebbleKit JS readyness!');
+                        }
+                       );
   }
 );
 
@@ -118,10 +127,12 @@ Pebble.addEventListener('ready',
 // Listen for when an AppMessage is received
 Pebble.addEventListener('appmessage',
   function(e) {
+    /*
     var skeys = JSON.stringify(keys, null, 4); 
     console.log('AppMessage received!' + skeys);
     var se = JSON.stringify(e, null, 4); 
     console.log('                 e= ' + se);
+    */
 
     if (keys) {
       var key = keys.OWM_APPID;
