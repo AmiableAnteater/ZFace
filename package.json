@@ -6,13 +6,20 @@
     "pebble": {
         "capabilities": [
             "location",
+            "configurable",
             "health"
         ],
         "displayName": "ZFace",
         "enableMultiJS": true,
         "messageKeys": [
             "TEMPERATURE",
-            "CONDITIONS"
+            "CONDITIONS",
+            "HIGH_CONTRAST",
+            "COLOR_RED",
+            "COLOR_GREEN",
+            "COLOR_BLUE",
+            "OWM_APPID",
+            "OWM_APPID_LEN"
         ],
         "projectType": "native",
         "resources": {
@@ -30,7 +37,7 @@
             "basalt",
             "chalk"
         ],
-        "uuid": "f797bfe8-ffc2-42c0-9ff0-5959b0edd03a",
+        "uuid": "a5d9b4f0-e9c8-4712-b38b-6ad3de0d1f66",
         "watchapp": {
             "watchface": true
         }

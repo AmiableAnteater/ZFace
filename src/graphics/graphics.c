@@ -1,5 +1,6 @@
 #include <pebble.h>
 #include "graphics.h"
+#include "../settings/settings.h"
 
 static Window *s_main_window;
 static GBitmap *s_bitmap;
@@ -11,7 +12,7 @@ static TextLayer *s_weather_layer;
 static TextLayer *s_time_layer;
 static TextLayer *s_steps_layer;
 static time_t s_last_weather_update = 0;
-static const unsigned int s_max_diff = 60 * 20;
+static const unsigned int s_max_diff = 60 * 1;
 
 // changes several colors in one pass
 void effect_multicolorswap(GContext* ctx,  GRect position, void* param) {
@@ -35,8 +36,6 @@ void effect_multicolorswap(GContext* ctx,  GRect position, void* param) {
        for (int colIdx = 0; colIdx < MAX_REPLACE_COLORS; colIdx++) {
           if (gcolor_equal(pixel, swap->fromColor[colIdx])) {
             GColor toColor = (x <= swap->finishedX) ? swap->toColorFinishedPart[colIdx] : swap->toColorUnfinishedPart[colIdx];
-            if (x%20 == 0 && y %50 == 0)
-              APP_LOG(APP_LOG_LEVEL_DEBUG, "x:%03d y:%03d: Swapping %03d to %03d", x, y, pixel.argb, toColor.argb);
             set_pixel(bitmap_info, y + position.origin.y, x + position.origin.x, toColor.argb);
           }
        }
@@ -60,25 +59,35 @@ void updateTime(struct tm *param_time) {
   // Display this time on the TextLayer
   text_layer_set_text(s_time_layer, s_buffer);
   
-  static char s_weather_buffer[8];
+  //static char s_weather_buffer[8];
   time_t now = time(NULL);
   unsigned int diff = now - s_last_weather_update;
   if (diff >= s_max_diff) {
+    // TODO: should be set on successful callback
     s_last_weather_update = now;
     
+    // TODO: to comm.c
     // Begin dictionary
     DictionaryIterator *iter;
-    app_message_outbox_begin(&iter);
+    AppMessageResult result = app_message_outbox_begin(&iter);
+    if(result == APP_MSG_OK) {
+      // Construct the message - add a key-value pair
+      char* apiKey = getApiKey();
+      if (apiKey == NULL) {
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "No api key to send.");
+        dict_write_uint8(iter, 0, 0);
+      } else {
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "Sending api key %s", apiKey);
+        dict_write_cstring(iter, MESSAGE_KEY_OWM_APPID, apiKey);
+      }
+      // Send the message!
+      app_message_outbox_send();
   
-    // Add a key-value pair
-    dict_write_uint8(iter, 0, 0);
-  
-    // Send the message!
-    app_message_outbox_send();
-      
-    //snprintf(s_weather_buffer, 8, "%u", diff);
+    } else {
+      // The outbox cannot be used right now
+      APP_LOG(APP_LOG_LEVEL_ERROR, "Error preparing the outbox: %d", (int)result);
+    }      
   }
-  text_layer_set_text(s_weather_layer, s_weather_buffer);
 
   APP_LOG(APP_LOG_LEVEL_DEBUG, "< updateTime");
 }
