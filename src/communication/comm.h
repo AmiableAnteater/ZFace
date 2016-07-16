@@ -7,3 +7,5 @@ void outbox_failed_callback(DictionaryIterator *iterator, AppMessageResult reaso
 void outbox_sent_callback(DictionaryIterator *iterator, void *context);
 
 void init_communication();
+
+void checkWeatherUpdate();

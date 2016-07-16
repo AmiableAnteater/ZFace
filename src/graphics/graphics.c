@@ -1,6 +1,7 @@
 #include <pebble.h>
 #include "graphics.h"
 #include "../settings/settings.h"
+#include "../communication/comm.h"
 
 static Window *s_main_window;
 static GBitmap *s_bitmap;
@@ -11,8 +12,7 @@ static float s_progress = .0f;
 static TextLayer *s_weather_layer;
 static TextLayer *s_time_layer;
 static TextLayer *s_steps_layer;
-static time_t s_last_weather_update = 0;
-static const unsigned int s_max_diff = 60 * 1;
+
 
 // changes several colors in one pass
 void effect_multicolorswap(GContext* ctx,  GRect position, void* param) {
@@ -59,35 +59,7 @@ void updateTime(struct tm *param_time) {
   // Display this time on the TextLayer
   text_layer_set_text(s_time_layer, s_buffer);
   
-  //static char s_weather_buffer[8];
-  time_t now = time(NULL);
-  unsigned int diff = now - s_last_weather_update;
-  if (diff >= s_max_diff && isJsReady()) {
-    // TODO: should be set on successful callback
-    s_last_weather_update = now;
-    
-    // TODO: to comm.c
-    // Begin dictionary
-    DictionaryIterator *iter;
-    AppMessageResult result = app_message_outbox_begin(&iter);
-    if(result == APP_MSG_OK) {
-      // Construct the message - add a key-value pair
-      char* apiKey = getApiKey();
-      if (apiKey == NULL) {
-        APP_LOG(APP_LOG_LEVEL_DEBUG, "No api key to send.");
-        dict_write_uint8(iter, 0, 0);
-      } else {
-        APP_LOG(APP_LOG_LEVEL_DEBUG, "Sending api key %s", apiKey);
-        dict_write_cstring(iter, MESSAGE_KEY_OWM_APPID, apiKey);
-      }
-      // Send the message!
-      app_message_outbox_send();
-  
-    } else {
-      // The outbox cannot be used right now
-      APP_LOG(APP_LOG_LEVEL_ERROR, "Error preparing the outbox: %d", (int)result);
-    }      
-  }
+  checkWeatherUpdate();
 
   APP_LOG(APP_LOG_LEVEL_DEBUG, "< updateTime");
 }

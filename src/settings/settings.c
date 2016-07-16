@@ -1,8 +1,26 @@
 #include <pebble.h>
-#include "settings/settings.h"
+#include "settings.h"
 
 static char* s_api_key = NULL;
 static bool s_js_ready = false;
+static time_t s_last_weather_update = 0;
+static unsigned int s_freq_in_minutes = 0;
+
+
+
+void setUpdateFrequencyInMinutes(unsigned int frequency) {
+  if (frequency > 0 && frequency <= 24*60 && frequency != s_freq_in_minutes) {
+    s_freq_in_minutes = frequency;
+    persist_write_int(MESSAGE_KEY_UPDATE_FREQ, s_freq_in_minutes);
+  }
+}
+
+
+
+unsigned int getUpdateFrequencyInMinutes() {
+  return (unsigned int) s_freq_in_minutes;
+}
+
 
 
 void freeApiKey() {
@@ -14,11 +32,12 @@ void freeApiKey() {
 
 
 
-void setApiKey(char *owmApiKey) {
+bool setApiKey(char *owmApiKey) {
   if (owmApiKey == NULL) {
     freeApiKey();
     persist_write_string(MESSAGE_KEY_OWM_APPID, "");
   } else {
+    bool apiKeyWasNull = s_api_key == NULL;
     int len = strlen(owmApiKey) * sizeof(char);
     APP_LOG(APP_LOG_LEVEL_DEBUG, "Got an api key of length %i[bytes]", len);
     s_api_key = malloc(len + 1);
@@ -27,7 +46,9 @@ void setApiKey(char *owmApiKey) {
     persist_write_string(MESSAGE_KEY_OWM_APPID, s_api_key);
     persist_write_int(MESSAGE_KEY_OWM_APPID_LEN, len + 1);
     APP_LOG(APP_LOG_LEVEL_DEBUG, "Persisted API key.");
+    return apiKeyWasNull;
   }
+  return false;
 }
 
 
@@ -52,6 +73,12 @@ void init_settings(){
   } else {
     APP_LOG(APP_LOG_LEVEL_DEBUG, "    api_key_len was 0");
   }
+  
+  s_freq_in_minutes = persist_read_int(MESSAGE_KEY_UPDATE_FREQ);
+  if (s_freq_in_minutes == 0) {
+    setUpdateFrequencyInMinutes(10);
+  }
+  
   APP_LOG(APP_LOG_LEVEL_DEBUG, "< init_settings");
 }
 
@@ -75,4 +102,19 @@ void deinit_settings() {
   freeApiKey();
 }
 
+
+
+void signalSuccessfulWeatherUpdate() {
+  s_last_weather_update = time(NULL);
+  
+  struct tm *localtm = localtime(&s_last_weather_update);
+  static char s_buffer[128];
+  strftime(s_buffer, sizeof(s_buffer), "%Y/%m/%d %H:%M:%S", localtm);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Weather updated at %s.", s_buffer);
+}
+
+
+time_t getLastWeatherUpdate() {
+  return s_last_weather_update;
+}
 
