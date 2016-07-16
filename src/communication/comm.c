@@ -28,7 +28,7 @@ void inbox_received_callback(DictionaryIterator *iterator, void *context) {
   Tuple *js_ready_tuple = dict_find(iterator, MESSAGE_KEY_JS_KIT_READY);
   if (js_ready_tuple) {
     setJsReady();
-    // TODO request initial weather
+    checkWeatherUpdate();
   }
 }
 

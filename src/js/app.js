@@ -2,6 +2,8 @@ var keys = require('message_keys');
 
 var apiKey = '';
 
+
+
 var xhrRequest = function (url, type, callback) {
   var xhr = new XMLHttpRequest();
   xhr.onload = function () {
@@ -13,7 +15,7 @@ var xhrRequest = function (url, type, callback) {
 
 
 
-function locationSuccess_(pos) {
+function locationSuccess(pos) {
   if (apiKey) {
     // Construct URL
     var url = 'http://api.openweathermap.org/data/2.5/weather?lat=' +
@@ -27,7 +29,7 @@ function locationSuccess_(pos) {
       function(responseText) {
         // responseText contains a JSON object with weather info
         var json = JSON.parse(responseText);
-        console.log('OpenWeatherMap returne: ' + JSON.stringify(json));
+        console.log('OpenWeatherMap returned:\n' + JSON.stringify(json, null, 4));
         
         // Temperature in Kelvin requires adjustment
         var temperature = Math.round(json.main.temp);
@@ -60,7 +62,7 @@ function locationSuccess_(pos) {
   }
 }
 
-
+/*
 function locationSuccess(pos) {
   console.log('Got location - generating random weather.');
   var max = 45;
@@ -85,7 +87,7 @@ function locationSuccess(pos) {
                         }
                        );
 }
-
+*/
 
 function locationError(err) {
   console.log('Error requesting location!');

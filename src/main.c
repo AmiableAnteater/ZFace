@@ -9,6 +9,11 @@
 TODOs:
 - include sunrise/sunset/twilight: http://sunrise-sunset.org/api
 
+- Configuration
+  - update interval
+  - Unit °C/°F
+  - locale
+
 */
 
 
