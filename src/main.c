@@ -14,6 +14,7 @@ TODOs:
   - Unit °C/°F
   - locale
   https://developer.pebble.com/guides/user-interfaces/app-configuration/
+  https://github.com/pebble/clay
 */
 
 
