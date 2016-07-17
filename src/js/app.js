@@ -1,4 +1,11 @@
 var keys = require('message_keys');
+// Import the Clay package
+var Clay = require('pebble-clay');
+// Load our Clay configuration file
+var clayConfig = require('./config');
+// Initialize Clay
+var clay = new Clay(clayConfig);
+
 
 var apiKey = '';
 
@@ -155,14 +162,14 @@ Pebble.addEventListener('appmessage',
 );
 
 
-
+/*
 Pebble.addEventListener('showConfiguration', function() {
   var url = 'http://azpebconfig.site88.net/index.html';
   console.log('Showing configuration page: ' + url);
 
   Pebble.openURL(url);
 });
-
+*/
 
 
 Pebble.addEventListener('webviewclosed', function(e) {
