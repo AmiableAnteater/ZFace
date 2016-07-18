@@ -23,7 +23,8 @@
             "OWM_APPID",
             "OWM_APPID_LEN",
             "JS_KIT_READY",
-            "UPDATE_FREQ"
+            "UPDATE_FREQ",
+            "UNIT_TEMP"
         ],
         "projectType": "native",
         "resources": {

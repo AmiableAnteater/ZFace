@@ -90,8 +90,8 @@ void updateWeather(int temperature, char* conditions) {
   static char temperature_buffer[8];
   static char conditions_buffer[32];
   static char weather_layer_buffer[32];
-
-  snprintf(temperature_buffer, sizeof(temperature_buffer), "%d°C", temperature);
+  char *unit = useCelsius() ? "C" : "F";
+  snprintf(temperature_buffer, sizeof(temperature_buffer), "%d°%s", temperature, unit);
   snprintf(conditions_buffer, sizeof(conditions_buffer), "%s", conditions);
 
   // Assemble full string and display

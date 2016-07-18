@@ -1,51 +1,44 @@
 module.exports = [
   {
     "type": "heading",
-    "defaultValue": "App Configuration"
+    "defaultValue": "ZFace Configuration"
   },
   {
     "type": "text",
-    "defaultValue": "Here is some introductory text."
+    "defaultValue": "Dear user - thanks for using ZFace. To use the watchface effectively, you need to configure your OpenWeatherMap API key. All other settings are optional."
   },
   {
-    "type": "section",
-    "items": [
-      {
-        "type": "heading",
-        "defaultValue": "Colors"
-      },
-      {
-        "type": "color",
-        "messageKey": "BackgroundColor",
-        "defaultValue": "0x000000",
-        "label": "Background Color"
-      },
-      {
-        "type": "color",
-        "messageKey": "ForegroundColor",
-        "defaultValue": "0xFFFFFF",
-        "label": "Foreground Color"
-      }
-    ]
+    "type": "input",
+    "messageKey": "OWM_APPID",
+    "label": "OpenWeatherMap API key",
+    "attributes": {
+      "type": "text",
+      "placeholder": "e.g. 6293a029546f36d3e7df246ae2e09bd2"
+    }
   },
   {
-    "type": "section",
-    "items": [
-      {
-        "type": "heading",
-        "defaultValue": "More Settings"
+    "type": "slider",
+    "messageKey": "UPDATE_FREQ",
+    "defaultValue": 10,
+    "label": "Update frequency in minutes",
+    "description": "Configure how often the current weather is updated.",
+    "min": 5,
+    "max": 120,
+    "step": 5
+  },
+  {
+    "type": "radiogroup",
+    "messageKey": "UNIT_TEMP",
+    "label": "Temperature Unit",
+    "defaultValue": "C",
+    "options": [
+      { 
+        "label": "°Celsius", 
+        "value": "C" 
       },
-      {
-        "type": "toggle",
-        "messageKey": "SecondTick",
-        "label": "Enable Seconds",
-        "defaultValue": false
-      },
-      {
-        "type": "toggle",
-        "messageKey": "Animations",
-        "label": "Enable Animations",
-        "defaultValue": false
+      { 
+        "label": "°Fahrenheit", 
+        "value": "F" 
       }
     ]
   },

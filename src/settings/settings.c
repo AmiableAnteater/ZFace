@@ -5,13 +5,15 @@ static char* s_api_key = NULL;
 static bool s_js_ready = false;
 static time_t s_last_weather_update = 0;
 static unsigned int s_freq_in_minutes = 0;
-
+static bool s_use_celsius = true;
+static bool s_weather_config_changed = false;
 
 
 void setUpdateFrequencyInMinutes(unsigned int frequency) {
-  if (frequency > 0 && frequency <= 24*60 && frequency != s_freq_in_minutes) {
+  if (frequency > 0 && frequency != s_freq_in_minutes) {
     s_freq_in_minutes = frequency;
     persist_write_int(MESSAGE_KEY_UPDATE_FREQ, s_freq_in_minutes);
+    s_weather_config_changed = true;
   }
 }
 
@@ -46,6 +48,7 @@ bool setApiKey(char *owmApiKey) {
     persist_write_string(MESSAGE_KEY_OWM_APPID, s_api_key);
     persist_write_int(MESSAGE_KEY_OWM_APPID_LEN, len + 1);
     APP_LOG(APP_LOG_LEVEL_DEBUG, "Persisted API key.");
+    s_weather_config_changed = true;
     return apiKeyWasNull;
   }
   return false;
@@ -75,9 +78,13 @@ void init_settings(){
   }
   
   s_freq_in_minutes = persist_read_int(MESSAGE_KEY_UPDATE_FREQ);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Read update frequence %i from persistent storage.", s_freq_in_minutes);
   if (s_freq_in_minutes == 0) {
     setUpdateFrequencyInMinutes(10);
   }
+  
+  s_use_celsius = persist_read_int(MESSAGE_KEY_UNIT_TEMP) < 2;
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Read temperature unit %s from persistent storage.", s_use_celsius ? "Celsius" : "Fahrenheit");
   
   APP_LOG(APP_LOG_LEVEL_DEBUG, "< init_settings");
 }
@@ -106,6 +113,7 @@ void deinit_settings() {
 
 void signalSuccessfulWeatherUpdate() {
   s_last_weather_update = time(NULL);
+  s_weather_config_changed = false;
   
   struct tm *localtm = localtime(&s_last_weather_update);
   static char s_buffer[128];
@@ -118,3 +126,21 @@ time_t getLastWeatherUpdate() {
   return s_last_weather_update;
 }
 
+
+void setTemperatureUnitToCelsius(bool useDegreesCelsius) {
+  if (useDegreesCelsius != s_use_celsius) {
+    s_weather_config_changed = true;
+    s_use_celsius = useDegreesCelsius;
+    persist_write_int(MESSAGE_KEY_UNIT_TEMP, s_use_celsius ? 1 : 2);
+  }
+}
+
+
+bool useCelsius() {
+  return s_use_celsius;
+}
+
+
+bool weatherConfigChanged() {
+  return s_weather_config_changed;
+}
