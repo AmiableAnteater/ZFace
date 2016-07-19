@@ -9,9 +9,8 @@
 TODOs:
 - include sunrise/sunset/twilight: http://sunrise-sunset.org/api
 
-- Configuration CHANGE TO CLAY!
-  - update interval
-  - Unit °C/°F
+- Configuration
+  - step target
   - locale
   https://developer.pebble.com/guides/user-interfaces/app-configuration/
   https://github.com/pebble/clay
