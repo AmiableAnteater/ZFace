@@ -7,6 +7,7 @@ static time_t s_last_weather_update = 0;
 static unsigned int s_freq_in_minutes = 0;
 static bool s_use_celsius = true;
 static bool s_weather_config_changed = false;
+static WeatherLocale_t s_weather_locale = ENGLISH;
 
 
 void setUpdateFrequencyInMinutes(unsigned int frequency) {
@@ -86,6 +87,13 @@ void init_settings(){
   s_use_celsius = persist_read_int(MESSAGE_KEY_UNIT_TEMP) < 2;
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Read temperature unit %s from persistent storage.", s_use_celsius ? "Celsius" : "Fahrenheit");
   
+  
+  s_weather_locale = persist_read_int(MESSAGE_KEY_WEATHER_LOCALE);
+  if (s_weather_locale == 0) {
+    s_weather_locale = ENGLISH;
+  }
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Read weather locale %i from persistent storage.", s_weather_locale);
+  
   APP_LOG(APP_LOG_LEVEL_DEBUG, "< init_settings");
 }
 
@@ -144,3 +152,18 @@ bool useCelsius() {
 bool weatherConfigChanged() {
   return s_weather_config_changed;
 }
+
+
+void setWeatherLocale(WeatherLocale_t loc) {
+  if (loc != s_weather_locale) {
+    s_weather_config_changed = true;
+    s_weather_locale = loc;
+    persist_write_int(MESSAGE_KEY_WEATHER_LOCALE, s_weather_locale);
+  }
+}
+
+
+WeatherLocale_t getWeatherLocale() {
+  return s_weather_locale;
+}
+

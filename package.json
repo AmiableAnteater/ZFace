@@ -15,16 +15,19 @@
         "enableMultiJS": true,
         "messageKeys": [
             "TEMPERATURE",
-            "CONDITIONS",
-            "HIGH_CONTRAST",
-            "COLOR_RED",
-            "COLOR_GREEN",
-            "COLOR_BLUE",
+            "CONDITION_CODE",
             "OWM_APPID",
             "OWM_APPID_LEN",
             "JS_KIT_READY",
             "UPDATE_FREQ",
-            "UNIT_TEMP"
+            "UNIT_TEMP",
+            "CONDITION_DESC",
+            "LOCATION_NAME",
+            "PRESSURE",
+            "HUMIDITY",
+            "WIND_SPEED",
+            "WIND_DIR",
+            "WEATHER_LOCALE"
         ],
         "projectType": "native",
         "resources": {

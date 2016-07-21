@@ -14,6 +14,9 @@ TODOs:
   - locale
   https://developer.pebble.com/guides/user-interfaces/app-configuration/
   https://github.com/pebble/clay
+  
+  
+- Show weekday + date
 */
 
 

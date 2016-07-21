@@ -8,7 +8,7 @@
 void inbox_received_callback(DictionaryIterator *iterator, void *context) {
   // Read tuples for data
   Tuple *temp_tuple = dict_find(iterator, MESSAGE_KEY_TEMPERATURE);
-  Tuple *conditions_tuple = dict_find(iterator, MESSAGE_KEY_CONDITIONS);
+  Tuple *conditions_tuple = dict_find(iterator, MESSAGE_KEY_CONDITION_DESC);
 
   // If all data is available, use it
   if(temp_tuple && conditions_tuple) {
@@ -48,6 +48,15 @@ void inbox_received_callback(DictionaryIterator *iterator, void *context) {
     setTemperatureUnitToCelsius(useCelsius);
     requestWeatherUpdate = true;
   }
+  
+  Tuple *weather_locale_tuple = dict_find(iterator, MESSAGE_KEY_WEATHER_LOCALE);
+  if (weather_locale_tuple) {
+    int32_t localeAsInt = weather_locale_tuple->value->int32;
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Received %i as locale.", (unsigned int)localeAsInt);
+    setWeatherLocale(localeAsInt);
+    requestWeatherUpdate = true;
+  }
+  
   
   if (requestWeatherUpdate) {
     checkWeatherUpdate();
@@ -121,6 +130,9 @@ void checkWeatherUpdate() {
       dict_write_cstring(iter, MESSAGE_KEY_OWM_APPID, apiKey);
       int value = useCelsius() ? 1 : 0;
       dict_write_int(iter, MESSAGE_KEY_UNIT_TEMP, &value, sizeof(int), true);
+      
+      int localeValue = getWeatherLocale();
+      dict_write_int(iter, MESSAGE_KEY_WEATHER_LOCALE, &localeValue, sizeof(int), true);
 
       // Send the message!
       app_message_outbox_send();
